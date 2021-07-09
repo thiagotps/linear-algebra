@@ -47,3 +47,13 @@ mul (SparseMatrix a) (VectorDouble b) = unsafePerformIO $ do
       dest@(VectorDouble c) <- V.createVectorDouble n Nothing -- NOTE: This is not safe
       withForeignPtr c $ \cp -> c_mul ap bp cp
       return dest
+
+
+maxEigenValue :: SparseMatrix -> Maybe Double
+maxEigenValue (SparseMatrix a) = unsafePerformIO $ do
+  withForeignPtr a $ \ap -> do
+    alloca $ \dest -> do
+      r <- c_largest_eigen_value ap dest
+      if r == 0
+        then Just . fromC <$> peek dest
+        else return Nothing

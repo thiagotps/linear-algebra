@@ -1,7 +1,11 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseCore>
+#include <Spectra/GenEigsSolver.h>
+#include <Spectra/MatOp/SparseGenMatProd.h>
 
 using namespace Eigen;
+using namespace Spectra;
+using namespace std;
 
 using RowSparseMatrix = SparseMatrix<double, RowMajor>;
 using VectorDouble = Eigen::VectorXd;
@@ -60,6 +64,28 @@ void vector_to_list(VectorDouble *v, double *dest) {
   int n = v->size();
   for (int i = 0; i < n; i++)
     dest[i] = (*v)[i];
+}
+
+double get_vector_elem(VectorDouble *v, int idx) {return (*v)[idx];}
+
+int largest_eigen_value(const RowSparseMatrix *m, double * dest) {
+  SparseGenMatProd<double, RowMajor> op(*m);
+  static const int nev = 1;
+  GenEigsSolver<SparseGenMatProd<double, RowMajor>> eigs(op, nev, 2*nev + 1);
+
+  eigs.init();
+  eigs.compute(SortRule::LargestMagn);
+
+  if (eigs.info() == CompInfo::Successful) {
+    auto v = eigs.eigenvalues();
+    *dest = abs(v[0]);
+    for (int i = 0; i < v.size(); i++)
+      *dest = max(*dest, abs(v[i]));
+
+    return 0;
+  }
+
+  return -1;
 }
 
 

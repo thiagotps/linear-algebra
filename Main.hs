@@ -20,3 +20,5 @@ main = do
   print m
   print (a .*. b)
   print (m !*. a .+. b)
+  putStrLn $ "a's max eigenvalue is " ++ show (S.maxEigenValue m)
+  putStrLn $ "The 1-th element of a is " ++ show (a V.! 1)

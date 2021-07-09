@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
-module LinearAlgebra.FFI where
+module LinearAlgebra.FFI (module LinearAlgebra.FFI) where
 import Foreign.C.Types
 import Foreign.Storable
 import Foreign.Ptr
@@ -50,7 +50,6 @@ data CSparseMatrix
 data CVectorDouble
 
 
-
 foreign import ccall unsafe "teste.c new_sparse_matrix" c_new_sparse_matrix :: CInt -> CInt -> Ptr CTriplet -> CInt -> IO (Ptr CSparseMatrix)
 foreign import ccall unsafe "teste.c &free_sparse_matrix" c_free_sparse_matrix :: FunPtr(Ptr CSparseMatrix -> IO ())
 foreign import ccall unsafe "teste.c non_zeros" c_non_zeros :: Ptr CSparseMatrix -> IO CInt
@@ -64,3 +63,6 @@ foreign import ccall unsafe "teste.c add " c_add :: Ptr CVectorDouble -> Ptr CVe
 
 foreign import ccall unsafe "teste.c vector_size " c_vector_size :: Ptr CVectorDouble -> IO CInt
 foreign import ccall unsafe "teste.c vector_to_list " c_vector_to_list :: Ptr CVectorDouble -> Ptr CDouble ->  IO ()
+
+foreign import ccall unsafe "teste.c get_vector_elem" c_get_vector_elem :: Ptr CVectorDouble -> CInt ->  IO CDouble
+foreign import ccall unsafe "teste.c largest_eigen_value"  c_largest_eigen_value :: Ptr CSparseMatrix -> Ptr CDouble ->  IO CInt
