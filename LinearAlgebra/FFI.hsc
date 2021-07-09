@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
-module FFI where
+module LinearAlgebra.FFI where
 import Foreign.C.Types
 import Foreign.Storable
 import Foreign.Ptr
@@ -47,44 +47,8 @@ instance  Storable CTriplet where
         <*> peekByteOff p (sizeOf (undefined :: CInt) * 2)
 
 data CSparseMatrix
-
-createCSparseMatrix :: CInt -> CInt -> VS.Vector CTriplet -> IO (ForeignPtr CSparseMatrix)
-createCSparseMatrix nrow ncol v = do
-  let n = toC . VS.length $ v
-  VS.unsafeWith v $ \vPtr -> do
-    ptr <- c_new_sparse_matrix nrow ncol vPtr n
-    if ptr /= nullPtr
-      then newForeignPtr c_free_sparse_matrix ptr
-      else
-        error "It was not possible to create a SparseMatrix. Allocation error. This is a severe error !"
-
-toCVector :: ForeignPtr CSparseMatrix -> IO (VS.Vector CTriplet)
-toCVector fPtr = do
-  withForeignPtr fPtr $ \p -> do
-    s <- c_non_zeros p
-    tris <- VSM.new (fromC s)
-    VSM.unsafeWith tris $ \q ->
-      c_sparse_to_list p q s
-    VS.unsafeFreeze tris
-
 data CVectorDouble
 
-createCVectorDouble :: CInt -> Maybe (VS.Vector CDouble) -> IO (ForeignPtr CVectorDouble)
-createCVectorDouble n (Just v) = do
-  VS.unsafeWith v $ \vp -> do
-    ptr <- c_new_vector n vp
-    newForeignPtr c_free_vector ptr
-createCVectorDouble n Nothing = do
-    ptr <- c_new_vector n nullPtr
-    newForeignPtr c_free_vector ptr
-
-cVectorDoubleToVector :: ForeignPtr CVectorDouble -> IO (VS.Vector CDouble)
-cVectorDoubleToVector fPtr = do
-  withForeignPtr fPtr $ \p -> do
-    n <- fromC <$> c_vector_size p
-    v <- VSM.new n
-    VSM.unsafeWith v $ \vp -> c_vector_to_list p vp
-    VS.unsafeFreeze v
 
 
 foreign import ccall unsafe "teste.c new_sparse_matrix" c_new_sparse_matrix :: CInt -> CInt -> Ptr CTriplet -> CInt -> IO (Ptr CSparseMatrix)
@@ -94,9 +58,9 @@ foreign import ccall unsafe "teste.c sparse_to_list" c_sparse_to_list :: Ptr CSp
 foreign import ccall unsafe "teste.c new_vector" c_new_vector :: CInt -> Ptr CDouble -> IO (Ptr CVectorDouble)
 foreign import ccall unsafe "teste.c &free_vector" c_free_vector :: FunPtr (Ptr CVectorDouble -> IO ())
 
-foreign import ccall unsafe "teste.c dot" c_dot :: Ptr CVectorDouble -> Ptr CVectorDouble -> CDouble
+foreign import ccall unsafe "teste.c dot" c_dot :: Ptr CVectorDouble -> Ptr CVectorDouble -> IO CDouble
 foreign import ccall unsafe "teste.c mul" c_mul :: Ptr CSparseMatrix -> Ptr CVectorDouble -> Ptr CVectorDouble -> IO ()
-foreign import ccall unsafe "teste.c add " c_add :: Ptr CSparseMatrix -> Ptr CVectorDouble -> Ptr CVectorDouble -> IO ()
+foreign import ccall unsafe "teste.c add " c_add :: Ptr CVectorDouble -> Ptr CVectorDouble -> Ptr CVectorDouble -> IO ()
 
 foreign import ccall unsafe "teste.c vector_size " c_vector_size :: Ptr CVectorDouble -> IO CInt
 foreign import ccall unsafe "teste.c vector_to_list " c_vector_to_list :: Ptr CVectorDouble -> Ptr CDouble ->  IO ()

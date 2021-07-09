@@ -18,7 +18,7 @@ build-type:          Simple
 
 executable teste
   main-is:             Main.hs
-  other-modules: FFI, Sparse
+  other-modules: LinearAlgebra.FFI, LinearAlgebra.Sparse, LinearAlgebra.Vector
   -- other-extensions:
   build-depends:       base >=4.13 && <4.14, vector
   -- hs-source-dirs:

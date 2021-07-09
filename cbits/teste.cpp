@@ -9,8 +9,7 @@ using VectorComplex = Eigen::VectorXcd;
 
 extern "C" {
 
-RowSparseMatrix *new_sparse_matrix(int nrow, int ncol, const Triplet<double> *t,
-                                   int n) {
+RowSparseMatrix *new_sparse_matrix(int nrow, int ncol, const Triplet<double> *t, int n) {
   RowSparseMatrix *s = new RowSparseMatrix(nrow, ncol);
   if (s != nullptr)
     s->setFromTriplets(t, t + n);
@@ -34,12 +33,18 @@ int sparse_to_list(const RowSparseMatrix *m, Triplet<double> *t, int s) {
 
 void free_sparse_matrix(RowSparseMatrix *s) { delete s; }
 
-double dot(const VectorDouble * a, const VectorDouble * b) {return a->dot(*b);}
-void mul(const RowSparseMatrix * m, const VectorDouble * b, VectorDouble * dest) { *dest = (*m)*(*b);}
-void add(const VectorDouble * a, const VectorDouble * b, VectorDouble * dest) { *dest = (*a) + (*b);}
+double dot(const VectorDouble *a, const VectorDouble *b) { return a->dot(*b); }
 
-VectorDouble * new_vector(int n, const double * elems) {
-  auto v =  new VectorDouble (n);
+void mul(const RowSparseMatrix *m, const VectorDouble *b, VectorDouble *dest) {
+  *dest = (*m) * (*b);
+}
+
+void add(const VectorDouble *a, const VectorDouble *b, VectorDouble *dest) {
+  *dest = (*a) + (*b);
+}
+
+VectorDouble *new_vector(int n, const double *elems) {
+  auto v = new VectorDouble(n);
   if (elems != nullptr)
     for (int i = 0; i < n; i++)
       (*v)[i] = elems[i];
@@ -47,14 +52,16 @@ VectorDouble * new_vector(int n, const double * elems) {
   return v;
 }
 
-void  free_vector(VectorDouble * v) { delete v; }
+void free_vector(VectorDouble *v) { delete v; }
 
-  int vector_size(VectorDouble * v) {return v->size();}
+int vector_size(VectorDouble *v) { return v->size(); }
 
-  void vector_to_list(VectorDouble * v, double * dest) {
-    int n = v->size();
-    for (int i = 0; i < n; i++)
-      dest[i] = (*v)[i];
-  }
+void vector_to_list(VectorDouble *v, double *dest) {
+  int n = v->size();
+  for (int i = 0; i < n; i++)
+    dest[i] = (*v)[i];
+}
+
+
 
 }
