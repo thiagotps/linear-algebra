@@ -46,6 +46,10 @@ instance  Storable CTriplet where
         <*> peekElemOff (castPtr p) 1
         <*> peekByteOff p (sizeOf (undefined :: CInt) * 2)
 
+class IsPtr m where
+  type family PtrType m
+  asPtr :: m -> (Ptr (PtrType m) -> IO b) -> IO b
+
 data CSparseMatrix
 data CVectorDouble
 
