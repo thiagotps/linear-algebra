@@ -1,18 +1,12 @@
 module Main where
 
 import Foreign.C.Types
-import LinearAlgebra.Sparse as S
-import LinearAlgebra.Vector as V
+import LinearAlgebra.Sparse (SparseMatrix)
+import qualified LinearAlgebra.Sparse as S
+import LinearAlgebra.Vector (VectorDouble)
+import qualified LinearAlgebra.Vector as V
 import qualified Data.Vector.Storable as VS
 import System.IO
-
-infixl 7 !*.
-infixl 7 .*.
-infixl 7 .+.
-
-(!*.) = S.mul
-(.*.) = V.dot
-(.+.) = V.add
 
 newtype Sparse = Sparse {getSparse :: [[(Int, Double)]]} deriving (Eq, Show, Read)
 
@@ -30,7 +24,8 @@ main = do
     (Sparse s) <- read <$> hGetContents h
     let m = buildMatrix s
     putStrLn "Searching maximum eigenvalue..."
-    putStrLn $ "maxEigenValue = " ++ show (maxEigenValue m)
+    putStrLn $ "maxEigenValuePower = " ++ show (S.powerMaxEigenValue m)
+    putStrLn $ "maxEigenValue = " ++ show (S.maxEigenValue m)
 
     -- print . maxEigenValue' (10**(-2)) (10^6) $ s
     -- print . (!! 20) . powerAdvancedIteration  $ s

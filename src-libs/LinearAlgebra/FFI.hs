@@ -61,9 +61,13 @@ foreign import ccall unsafe "teste.c sparse_to_list" c_sparse_to_list :: Ptr CSp
 foreign import ccall unsafe "teste.c new_vector" c_new_vector :: CInt -> Ptr CDouble -> IO (Ptr CVectorDouble)
 foreign import ccall unsafe "teste.c &free_vector" c_free_vector :: FunPtr (Ptr CVectorDouble -> IO ())
 
+foreign import ccall unsafe "teste.c sparse_rows" c_sparse_rows :: Ptr CSparseMatrix -> IO CInt
+foreign import ccall unsafe "teste.c sparse_cols" c_sparse_cols :: Ptr CSparseMatrix -> IO CInt
+
 foreign import ccall unsafe "teste.c dot" c_dot :: Ptr CVectorDouble -> Ptr CVectorDouble -> IO CDouble
-foreign import ccall unsafe "teste.c mul" c_mul :: Ptr CSparseMatrix -> Ptr CVectorDouble -> Ptr CVectorDouble -> IO ()
-foreign import ccall unsafe "teste.c add " c_add :: Ptr CVectorDouble -> Ptr CVectorDouble -> Ptr CVectorDouble -> IO ()
+foreign import ccall unsafe "teste.c mul" c_mul :: Ptr CSparseMatrix -> Ptr CVectorDouble -> IO (Ptr CVectorDouble)
+foreign import ccall unsafe "teste.c add " c_add :: Ptr CVectorDouble -> Ptr CVectorDouble -> IO (Ptr CVectorDouble)
+foreign import ccall unsafe "teste.c mul_vector_by_scalar " c_mul_vector_by_scalar :: CDouble -> Ptr CVectorDouble -> IO (Ptr CVectorDouble)
 
 foreign import ccall unsafe "teste.c vector_size " c_vector_size :: Ptr CVectorDouble -> IO CInt
 foreign import ccall unsafe "teste.c vector_to_list " c_vector_to_list :: Ptr CVectorDouble -> Ptr CDouble ->  IO ()

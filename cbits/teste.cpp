@@ -23,6 +23,9 @@ RowSparseMatrix *new_sparse_matrix(int nrow, int ncol, const Triplet<double> *t,
 
 int non_zeros(const RowSparseMatrix *m) { return m->nonZeros(); }
 
+  int sparse_rows(const RowSparseMatrix * m) {return m->rows();}
+  int sparse_cols(const RowSparseMatrix * m) {return m->cols();}
+
 int sparse_to_list(const RowSparseMatrix *m, Triplet<double> *t, int s) {
   int n = 0;
   for (int k = 0; k < m->outerSize(); ++k) {
@@ -37,15 +40,6 @@ int sparse_to_list(const RowSparseMatrix *m, Triplet<double> *t, int s) {
 
 void free_sparse_matrix(RowSparseMatrix *s) { delete s; }
 
-double dot(const VectorDouble *a, const VectorDouble *b) { return a->dot(*b); }
-
-void mul(const RowSparseMatrix *m, const VectorDouble *b, VectorDouble *dest) {
-  *dest = (*m) * (*b);
-}
-
-void add(const VectorDouble *a, const VectorDouble *b, VectorDouble *dest) {
-  *dest = (*a) + (*b);
-}
 
 VectorDouble *new_vector(int n, const double *elems) {
   auto v = new VectorDouble(n);
@@ -67,6 +61,22 @@ void vector_to_list(VectorDouble *v, double *dest) {
 }
 
 double get_vector_elem(VectorDouble *v, int idx) {return (*v)[idx];}
+
+double dot(const VectorDouble *a, const VectorDouble *b) { return a->dot(*b); }
+
+VectorDouble * mul(const RowSparseMatrix *m, const VectorDouble *b) {
+  return new VectorDouble{(*m) * (*b)};
+}
+
+VectorDouble * add(const VectorDouble *a, const VectorDouble *b, VectorDouble *dest) {
+  return new VectorDouble{(*a) + (*b)};
+}
+
+  VectorDouble * mul_vector_by_scalar (double s, const VectorDouble * a) {
+    return new VectorDouble{s*(*a)};
+  }
+
+
 
 int largest_eigen_value(const RowSparseMatrix *m, double * dest) {
   SparseGenMatProd<double, RowMajor> op(*m);
