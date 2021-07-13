@@ -73,4 +73,4 @@ foreign import ccall unsafe "teste.c vector_size " c_vector_size :: Ptr CVectorD
 foreign import ccall unsafe "teste.c vector_to_list " c_vector_to_list :: Ptr CVectorDouble -> Ptr CDouble ->  IO ()
 
 foreign import ccall unsafe "teste.c get_vector_elem" c_get_vector_elem :: Ptr CVectorDouble -> CInt ->  IO CDouble
-foreign import ccall unsafe "teste.c largest_eigen_value"  c_largest_eigen_value :: Ptr CSparseMatrix -> Ptr CDouble ->  IO CInt
+foreign import ccall unsafe "teste.c largest_eigen_value"  c_largest_eigen_value :: Ptr CSparseMatrix -> CInt -> CInt -> CDouble -> Ptr CDouble ->  IO CInt

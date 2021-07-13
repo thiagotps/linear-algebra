@@ -1,0 +1,40 @@
+name:                linear-algebra
+version:             0.1.0.0
+github:              "githubuser/linear-algebra" # TODO: Fix this
+license:             GLP-3
+author:              "Thiago Teodoro Pereira Silva"
+maintainer:          "thiagoteodoro501@gmail.com"
+copyright:           "2021 Thiago Teodoro Pereira Silva"
+
+# extra-source-files:
+  # - cbits
+  # - eigen-3.4-rc1
+  # -spectra-1.0.0
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/helloworld#readme> # TODO: Fix this
+
+dependencies:
+- base >= 4.7 && < 5
+- vector
+
+library:
+  source-dirs: src-libs
+  c-sources: cbits/teste.cpp
+  extra-libraries: stdc++
+  include-dirs: cbits, eigen-3.4-rc1, spectra-1.0.0/include
+
+executables:
+  linear-algebra:
+    main:                Main.hs
+    source-dirs:         src-exe
+    ghc-options:
+    - -O2
+    dependencies:
+    - linear-algebra

@@ -1,6 +1,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseCore>
 #include <Spectra/GenEigsSolver.h>
+#include <Spectra/GenEigsComplexShiftSolver.h>
 #include <Spectra/MatOp/SparseGenMatProd.h>
 
 using namespace Eigen;
@@ -78,26 +79,23 @@ VectorDouble * add(const VectorDouble *a, const VectorDouble *b, VectorDouble *d
 
 
 
-int largest_eigen_value(const RowSparseMatrix *m, double * dest) {
+int largest_eigen_value(const RowSparseMatrix *m, int ncv, int iterations, double precision, double * dest) {
   SparseGenMatProd<double, RowMajor> op(*m);
   static const int nev = 1;
-  GenEigsSolver<SparseGenMatProd<double, RowMajor>> eigs(op, nev, 2*nev + 1);
+  GenEigsSolver<SparseGenMatProd<double, RowMajor>> eigs(op, nev, ncv);
 
   eigs.init();
-  eigs.compute(SortRule::LargestMagn);
+  eigs.compute(SortRule::LargestMagn, iterations, precision);
 
-  if (eigs.info() == CompInfo::Successful) {
+  auto info = eigs.info();
+  if (info == CompInfo::Successful) {
     auto v = eigs.eigenvalues();
     *dest = abs(v[0]);
     for (int i = 0; i < v.size(); i++)
       *dest = max(*dest, abs(v[i]));
-
-    return 0;
   }
 
-  return -1;
+  return (int)info;
 }
-
-
 
 }

@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module LinearAlgebra.Sparse (module LinearAlgebra.Sparse) where
 import LinearAlgebra.FFI
 import qualified LinearAlgebra.Vector as V
@@ -11,6 +12,8 @@ import Foreign
 import Foreign.C.Types
 import Control.Monad
 import qualified Data.List as L
+import GHC.Read (readPrec)
+import Control.Arrow (first)
 
 newtype SparseMatrix = SparseMatrix (ForeignPtr CSparseMatrix)
 
@@ -19,7 +22,16 @@ instance IsPtr SparseMatrix where
   asPtr (SparseMatrix ptr) = withForeignPtr ptr
 
 instance Show SparseMatrix where
-  show s = "SparseMatrix " ++ show (toList s)
+  show s = "SparseMatrix " ++ show (m, n, l)
+    where
+      l = toList s
+      m = rows s
+      n = cols s
+
+instance Read SparseMatrix where
+  readsPrec s = map (first go) . readsPrec s
+    where
+      go (m, n, l) = fromList m n l
 
 sparseMatrixFromC :: Ptr CSparseMatrix -> IO SparseMatrix
 sparseMatrixFromC ptr = SparseMatrix <$> newForeignPtr c_free_sparse_matrix ptr
@@ -62,14 +74,21 @@ rows sm = unsafePerformIO $ asPtr sm (fmap fromC . c_sparse_rows)
 cols :: SparseMatrix -> Int
 cols sm = unsafePerformIO $ asPtr sm (fmap fromC . c_sparse_cols)
 
-maxEigenValue :: SparseMatrix -> Maybe Double
-maxEigenValue (SparseMatrix a) = unsafePerformIO $ do
-  withForeignPtr a $ \ap -> do
+data EigenConfig = EigenConfig {ncv :: Int, iterations :: Int, precision :: Double} deriving (Eq, Show, Read)
+data CompInfo=  Successful | NotComputed | NotConverging | NumericalIssue deriving (Eq, Show, Read, Enum)
+
+eigenDefaultConfig = EigenConfig{ncv=2*nev + 1, iterations=2000, precision=10**(-5)}
+  where
+    nev = 1 -- Number of eigenvalues
+
+maxEigenValue :: EigenConfig -> SparseMatrix -> Either CompInfo Double
+maxEigenValue EigenConfig{ncv, iterations, precision} a = unsafePerformIO $ do
+  asPtr a $ \ap -> do
     alloca $ \dest -> do
-      r <- c_largest_eigen_value ap dest
-      if r == 0
-        then Just . fromC <$> peek dest
-        else return Nothing
+      r <- toEnum . fromC <$> c_largest_eigen_value ap (toC ncv) (toC iterations) (toC precision) dest
+      if r == Successful
+        then Right . fromC <$> peek dest
+        else return (Left r)
 
 powerMethodIteration :: SparseMatrix -> [Double]
 powerMethodIteration a = eigen

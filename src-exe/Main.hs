@@ -1,34 +1,28 @@
 module Main where
 
 import Foreign.C.Types
-import LinearAlgebra.Sparse (SparseMatrix)
+import LinearAlgebra.Sparse (SparseMatrix, EigenConfig(..), (!*.), eigenDefaultConfig)
 import qualified LinearAlgebra.Sparse as S
-import LinearAlgebra.Vector (VectorDouble)
+import LinearAlgebra.Vector (VectorDouble, (.*.), (.+.))
 import qualified LinearAlgebra.Vector as V
 import qualified Data.Vector.Storable as VS
 import System.IO
 
 newtype Sparse = Sparse {getSparse :: [[(Int, Double)]]} deriving (Eq, Show, Read)
 
-
-buildMatrix :: [[(Int, Double)]] -> SparseMatrix
-buildMatrix s = S.fromList m n $ concat [map (addIdx i) l | (i,l) <- [0..] `zip` s]
+readMatrix :: String -> SparseMatrix
+readMatrix str = S.fromList m n l
   where
-    m = length s
-    n = (maximum . map fst . concat $ s) + 1
-    addIdx i (a,b) = (i, a, b)
+    (m, n, l) = read . unwords . tail . words $ str
 
 main = do
   putStrLn "Getting matrix..."
   withFile "lmshs.log" ReadMode $ \h -> do
-    (Sparse s) <- read <$> hGetContents h
-    let m = buildMatrix s
+    m <- readMatrix <$> hGetContents h
     putStrLn "Searching maximum eigenvalue..."
-    putStrLn $ "maxEigenValuePower = " ++ show (S.powerMaxEigenValue m)
-    putStrLn $ "maxEigenValue = " ++ show (S.maxEigenValue m)
+    -- putStrLn $ "maxEigenValuePower = " ++ show (S.powerMaxEigenValue m)
+    putStrLn $ "maxEigenValue = " ++ show (S.maxEigenValue eigenDefaultConfig{ncv= ncv eigenDefaultConfig + 4} m)
 
-    -- print . maxEigenValue' (10**(-2)) (10^6) $ s
-    -- print . (!! 20) . powerAdvancedIteration  $ s
 
 -- main = do
 --   let m = S.fromList 3 3 [(0,0,2), (1,1,2), (2,2,2)]
