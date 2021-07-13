@@ -1,7 +1,7 @@
 name:                linear-algebra
 version:             0.1.0.0
 github:              "githubuser/linear-algebra" # TODO: Fix this
-license:             GLP-3
+license:             LGPL-3
 author:              "Thiago Teodoro Pereira Silva"
 maintainer:          "thiagoteodoro501@gmail.com"
 copyright:           "2021 Thiago Teodoro Pereira Silva"
